@@ -1,14 +1,16 @@
-var express = require('express');
-var mongoose = require('mongoose');
-var morgan = require('morgan');
-var bodyParser = require('body-parser');
+'use strict';
+
+const express = require('express');
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
 
 // Routes
-var apiRoutes = require('./routes/apiVersion1');
+const apiRoutes = require('./routes/apiVersion1');
 
 require('dotenv').config({silent: true});
 
-var app = express();
+const app = express();
 
 app.use(morgan('combined'));
 
@@ -17,24 +19,22 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-var MONGO_URI = process.env.MONGODB_URI ||
+const MONGO_URI = process.env.MONGODB_URI ||
                 process.env.MONGO_URI ||
-                process.env.IP + '/nightlife';
+                process.env.IP + '/stocks';
                 
+mongoose.connect(MONGO_URI);
+
 app.set('view engine', 'pug');
 app.set('views', './templates');
 
 app.use(express.static(__dirname + '/build'));
 
 app.use('/api/v1', apiRoutes);
-
 app.get('/', index);
 
-/**
- * HOME
- **/
 function index(req, res) {
     return res.render('index');
 }

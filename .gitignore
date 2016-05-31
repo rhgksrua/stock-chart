@@ -34,3 +34,6 @@ node_modules
 
 # dotenv
 .env
+
+# mongod storage
+data
