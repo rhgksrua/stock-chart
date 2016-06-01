@@ -1,9 +1,9 @@
 'use strict';
 
 const utils = require('../lib/utils');
-const addStockPromise = require('./addStockPromise');
+const removeStockPromise = require('./removeStockPromise');
 
-function addStock(req, res) {
+function removeStock(req, res) {
     const userInputStock = req.body.stock;
     if (!userInputStock ||
         !utils.isString(userInputStock) ||
@@ -14,16 +14,14 @@ function addStock(req, res) {
         });
     }
     
-    addStockPromise(userInputStock)
+    removeStockPromise(userInputStock)
         .then(function(stock) {
-            console.log(stock.display);
-            return res.json(stock);
+            return res.json({msg: 'Removed stock'});
         })
         .catch(function(err) {
             console.log(err);
             res.json({error: true, msg: 'internal error'});
         });
-        
 }
 
-module.exports = addStock;
+module.exports = removeStock;

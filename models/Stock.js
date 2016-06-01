@@ -10,7 +10,8 @@ const Stock = new Schema({
     start_date: Date,
     end_date: Date,
     column_names: [ String ],
-    data: [ String ]
+    data: [ String ],
+    display: { type: Boolean, default: true }
 });
 
 

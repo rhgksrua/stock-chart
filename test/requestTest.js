@@ -55,7 +55,7 @@ describe('Add stock PUT /api/v1/add', function() {
             .expect('Content-Type', /json/)
             .expect(200, {
                 error: true,
-                msg: 'Invalid Symbol'
+                msg: 'Invalid request'
             })
             .end(function(err, res) {
                 if (err) throw err;
