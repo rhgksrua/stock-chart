@@ -36,10 +36,8 @@ function fetchStockData(stockSymbol) {
         })
         .then(function(response) {
             if (response.hasOwnProperty('quandl_error')) {
-                return {
-                    error: true,
-                    msg: 'API error'
-                };
+                console.log(response.quandl_error);
+                throw new Error(response.quandl_error);
             }
             return storeFetchedStockData(response.dataset);
         });

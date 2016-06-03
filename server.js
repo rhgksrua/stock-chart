@@ -12,6 +12,7 @@ require('dotenv').config({silent: true});
 
 const app = express();
 
+
 app.use(morgan('combined'));
 
 app.use(bodyParser.json());
@@ -32,15 +33,37 @@ app.set('views', './templates');
 
 app.use(express.static(__dirname + '/build'));
 
+// Middleware to pass socket.io to routes
+app.use(function(req, res, next) {
+    res.io = io;
+    next();
+});
+
 app.use('/api/v1', apiRoutes);
 app.get('/', index);
+
 
 function index(req, res) {
     return res.render('index');
 }
 
-app.listen(port, function() {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
+server.listen(port, function() {
     console.log('started server');
+});
+
+// SOCKET IO
+console.log(process.env.NODE_ENV);
+
+io.on('connection', function(socket) {
+    socket.on('add stock', function(data) {
+        console.log('attempting to add stock...');
+    });
+    socket.on('remove stock', function(data) {
+        console.log('attempting to remove stock...')
+    })
 });
 
 module.exports = app;

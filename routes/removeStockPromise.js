@@ -18,10 +18,9 @@ function removeStockPromise(stockSymbol) {
     };
     return Stock.update(updateQuery, updateData, options).exec()
         .then(function(writeResult) {
+            console.log('update modified', writeResult);
             if (writeResult.nModified > 0) {
-                return {
-                    msg: 'Removed stock'
-                };
+                return stockSymbol;
             }
             throw new Error('Stock does not exist');
         });
