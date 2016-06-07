@@ -7,15 +7,15 @@ class StockList extends React.Component {
         super(props);
     }
     render() {
-        console.log(this.props);
+        //console.log(this.props);
         let allStocks = this.props.stocks.map(stock => {
             return (
-                <StockContainer key={stock.id} stockSymbol={stock.dataset_code} />
+                <StockContainer key={stock.id} stockSymbol={stock.dataset_code} color={stock.color} />
             );
             
         });
         return (
-            <div>
+            <div className='stocklist-container'>
                 <ul>
                     {allStocks}
                 </ul>

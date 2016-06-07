@@ -25,7 +25,7 @@ const port = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGODB_URI ||
                 process.env.MONGO_URI ||
                 process.env.IP + '/stocks';
-                
+console.log(MONGO_URI);
 mongoose.connect(MONGO_URI);
 
 app.set('view engine', 'pug');

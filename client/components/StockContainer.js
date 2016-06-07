@@ -4,7 +4,7 @@ import Stock from './Stock';
 import { removeStockAJAX } from '../actions/actions';
 
 function mapStateToProps(state, ownProps) {
-    console.log('-- ownprops', ownProps);
+    //console.log('-- ownprops', ownProps);
     return ownProps;
 }
 

@@ -1,10 +1,160 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+header {
+    height: 150px;
+    background-color: #424242;
+    margin-bottom: 50px;
+    box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.25);
+}
+
+h1 {
+    font-size: 5em;
+    text-align: center;
+    color: #EBEBEB;
+    padding-top: 50px;
+    letter-spacing: 4px;
+}
+
+.app-container {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.chart-container {
+    width: 950px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+
 .line {
     fill: none;
-    stroke: #7dc7f4;
-    stroke-width: 5px;
+    stroke-width: 2px;
 
 }
 
 #line-chart {
-    background: #EBEBEB;
+    background: #fff;
+    padding: 10px 20px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.15);
+    margin-bottom: 75px;
 }
+
+.axis{
+    fill: #000;
+    opacity: 1;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke-width: 1px;
+    stroke: #000;
+    shape-rendering: crispEdges;
+
+}
+
+.axis text {
+    font-size: 14px;
+}
+
+.y-grid .tick{
+    stroke: #4b5f87;
+    opacity: 1;
+}
+
+.tooltip-container {
+    position: relative;
+}
+
+.tool-tip {
+    position: absolute;
+    background-color: #000;
+    color: #FFF;
+    padding: 3px 5px;
+    border-radius: 2px;
+    box-shadow: 3px 5px 7px rgba(0, 0, 0, 0.15);
+    p {
+        display: inline-block;
+    }
+    .tool-tip-info {
+        padding: 2px 10px;
+        font-size: 0.8em;
+        .tool-tip-color {
+            height: 8px;
+            width: 8px;
+            border: 1px solid #FFF;
+            margin-right: 9px;
+        }
+        .tool-tip-symbol {
+            padding: 0;
+            width: 57px;
+        }
+        
+        .tool-tip-value {
+            background-color: #000;
+            padding: 4px;
+            border-radius: 4px;
+            text-align: right;
+            width: 52px;
+        }
+    }
+}
+
+.stocklist-container {
+    width: 800px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 50px;
+    margin-bottom: 100px;
+    ul {
+        width: 750px;
+        margin-right: auto;
+        margin-left: auto;
+        .stock {
+            position: relative;
+            display: inline-block;
+            width: 175px;
+            text-align: center;
+            height: 75px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            margin: 5px;
+            .stock-symbol {
+                display: inline-block;
+                position: relative;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .stock-remove {
+                position: absolute;
+                cursor: pointer;
+                top: 3px;
+                right: 3px;
+                padding: 2px;
+                &:hover {
+                    color: #FFF;
+                    background-color: #f92f2f;
+                    border-radius: 2px;
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

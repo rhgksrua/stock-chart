@@ -16,7 +16,8 @@ function addStock(req, res) {
     
     addStockPromise(userInputStock)
         .then(function(stock) {
-            console.log('--- trying to emit');
+            console.log('--- start date', stock.start_date);
+            console.log('--- end date', stock.end_date);
             res.io.emit('add stock', { stock });
             return stock;
         })

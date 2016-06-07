@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import randomcolor from 'randomcolor';
 
 export const ADD_STOCK = 'ADD_STOCK';
 export const REMOVE_STOCK = 'REMOVE_STOCK';
@@ -7,10 +8,10 @@ export const INITIALIZE = 'INITIALIZE';
 const HOST = `${window.location.protocol}//${window.location.host}`;
 
 export const addStock = stock => {
-    
+    //console.log('inside addStock', parsedData(stock.data));
     return {
         type: ADD_STOCK,
-        stock: Object.assign(stock, {parsedData: parsedData(stock.data)})
+        stock: Object.assign(stock, {parsedData: parsedData(stock.data), color: randomcolor()})
     };
 };
 
@@ -30,7 +31,7 @@ export const addStockAJAX = stockSymbol => {
                 return data.json();
             })
             .then(data => {
-                console.log(data);
+                //console.log(data);
                 if (data.error) throw new Error(data.error);
                 return data;
             })
@@ -81,7 +82,7 @@ export const removeStockAJAX = stockSymbol => {
 
 export const removeStockSocket = stockSymbol => {
     // do socket io sutff here
-    console.log('-- action remove stock scoket');
+    //console.log('-- action remove stock scoket');
     return dispatch => {
         dispatch(removeStock(stockSymbol));
     };
@@ -90,18 +91,23 @@ export const removeStockSocket = stockSymbol => {
 const addParsedDataInitialize = stocks => {
     return stocks.map(stock => {
         stock.parsedData = parsedData(stock.data);
+        stock.color = randomcolor();
         return stock;
     });
 };
 
 const parsedData = points => {
-    return points.map(point => {
-        const parsedPoint = point.split(',');
+    let parsedArray = points.map(point => {
+        // API used to return point data as a single string.
+        // Don't have to split strings anymore.
+        // const parsedPoint = point.split(',');
         return {
-            date: parsedPoint[0],
-            value: parseInt(parsedPoint[1], 10)
+            date: point[0],
+            value: parseInt(point[1], 10)
         };
     });
+    
+    return parsedArray.reverse();
 };
 
 export const initialize = (stocks) => {
@@ -127,6 +133,7 @@ export const initializeStocks = () => {
                 return data.json();
             })
             .then(data => {
+                //console.log('initialize data', data);
                 if (data.error) throw new Error(data.error);
                 dispatch(initialize(data));
                 return data;

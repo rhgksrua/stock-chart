@@ -3,6 +3,8 @@ import d3 from 'd3';
 import { connect } from 'react-redux';
 
 import Line from './Line';
+import Axis from './Axis';
+import Tooltip from './Tooltip';
 
 class Chart extends React.Component {
     constructor(props) {
@@ -14,9 +16,9 @@ class Chart extends React.Component {
         this.getEndDateArr = this.getEndDateArr.bind(this);
         this.parseDate = this.parseDate.bind(this);
     }
-    parseDate(date, specifier = '%Y-%m-%dT%H:%M:%S.%LZ') {
-        //console.log('inside parsdeata', date)
-        return d3.time.format(specifier).parse(date);
+    parseDate(date, specifier = '%Y-%m-%d') {
+        //date, specifier = '%Y-%m-%dT%H:%M:%S.%LZ'
+        return d3.time.format(specifier).parse(date.split('T')[0]);
     }
     getStartDateArr(stocks) {
         return stocks.reduce((prev, cur, i, arr) => {
@@ -30,74 +32,32 @@ class Chart extends React.Component {
     }
     render() {
         
-        
-        const startDates = this.getStartDateArr(this.props.stocks);
-        const endDates = this.getEndDateArr(this.props.stocks);
-        console.log('--- arr start date', startDates, endDates);
-        console.log('--- extends', d3.extent(startDates.concat(endDates)));
-        
         let stocks = this.props.stocks;
-        //console.log('start chart', stocks);
-        const parseDate = d3.time.format('%Y-%m-%d').parse;
         
-        const margin = {top: 5, right: 50, bottom: 20, left: 50}
-        const w = this.state.width - (margin.left + margin.right)
+        const startDates = this.getStartDateArr(stocks);
+        const endDates = this.getEndDateArr(stocks);
+        const startEndDates = startDates.concat(endDates);
+        console.log('start end', startEndDates);
+        
+        
+        const margin = {top: 5, right: 5, bottom: 40, left: 40};
+        const w = this.state.width - (margin.left + margin.right);
         const h = this.props.height - (margin.top + margin.bottom);
-        let largest;
         
-        // get oldest date
-        //stocks.reduce(function(prev, current, i, arr) {
-        //    return prev.length > current.length ? i : prev;
-            
-            
-        //}, 0);
-        let stock;
-        if (stocks.length > 0) {
-            stock = [stocks[0]];
-        } else {
-            stock = [];
-            return (
-                <div></div>
-            )
-        }
-        
-        //console.log(stock);
-        
-        //console.log('min max test', parseDate(stock.start_date));
-        if (stocks[0]) {
-            console.log('start date', parseDate(stocks[0].start_date));
-        }
-        //let parsed = stock.map(function(d, i) {
-        //    let spl = d.split(',');
-        //    if (i < 10) {
-        //        //console.log(parseDate(spl[0]), spl[0], spl[1], parseInt(spl[1], 10))
-        //    }
-        //    //console.log('--- spl', spl);
-        //    return { date: parseDate(spl[0]), val: parseInt(spl[1], 10) };
-        //});
-        //console.log('--parsed', parsed);
-        
-        //let xyMin = stocks.reduce(function(prev, cur, i, arr) {
-        //    return d3.min(prev.data.concat(cur.data));
-        //});
-        //
-        //let xyMax = stocks.reduce(function(prev, cur, i, arr) {
-        //    return d3.max(prev.data.concat(cur.data));
-        //});
-        
-        console.log('-- before min', stock)
-            
-        let yMin = d3.min(stock[0].parsedData, function(d) {
-            return d.value - 10;
-            
+        const allYMins = stocks.map(stock => {
+            return d3.min(stock.parsedData, d => d.value - 10);
         });
         
-        let yMax = d3.max(stock[0].parsedData, function(d) {
-            return d.value + 10;
-        })
+        const allYMaxes = stocks.map(stock => {
+            return d3.max(stock.parsedData, d =>  d.value + 10);
+        });
+            
+        let yMin = d3.min(allYMins);
+        let yMax = d3.max(allYMaxes);
+        
         
         let x = d3.time.scale()
-            .domain(d3.extent(startDates.concat(endDates), function(d) {
+            .domain(d3.extent(startEndDates, function(d) {
                 return d;
             }))
             .rangeRound([0, w]);
@@ -109,36 +69,63 @@ class Chart extends React.Component {
             
         let line = d3.svg.line()
             .x(function(d) {
-                //console.log('--- before parsedate', x(this.parseDate(d.date, '%Y-%m-%d')));
-                return x(this.parseDate(d.date, '%Y-%m-%d'));
+                let dd = x(this.parseDate(d.date, '%Y-%m-%d'));
+                return dd;
             }.bind(this))
             .y(function(d) {
-                //console.log(y(d.value));
-                return y(d.value)
+                let yPoint = y(d.value);
+                return yPoint;
             })
             .interpolate('cardinal');
-        
-        const allLines = stocks.map((stock, i) => {
-            //console.log('stock all lines', stock)
-            console.log(stock.dataset_code, i);
-            if (i === 0) {
-                console.log('found!!!!!!!!!!!!!', stock);
-                return (
-                    <Line key={stock._id} transform={transform} lineData={line(stock.parsedData)} />
-                );
-            }
-            return (
-                <path key={stock._id}/>
-            )
-        })
             
         const transform = `translate(${margin.left}, ${margin.top})`;
         
-                   // <Line transform={transform} lineData={line(parsed)} />
+        const allLines = stocks.map(stock => {
+            console.log(stock.dataset_code, stock.color);
+            return (
+                <Line key={stock.id}
+                      color={stock.color}
+                      transform={transform} 
+                      lineData={line(stock.parsedData)}
+                      stockName={stock.dataset_code}
+                />
+            );
+        });
+        
+        const yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient('left')
+                      .ticks(10);
+        
+        const xAxis = d3.svg.axis()
+                      .scale(x)
+                      .orient('bottom')
+                      .ticks(5);
+        
         return (
-            <div>
-                <svg id={this.props.chartId} width={this.state.width} height={this.props.height}>
-                    {allLines}
+            <div className='chart-container'>
+                <svg id={this.props.chartId} 
+                     width={this.state.width} 
+                     height={this.props.height} 
+                >
+                    <g transform={transform} >
+                        <Axis h={h} axis={yAxis} axisType='y' />
+                        <Axis h={h} axis={xAxis} axisType='x' />
+                        {allLines}
+                    </g>
+                    <rect
+                        transform={transform} 
+                        height={h}
+                        width={w}
+                        fill='none'
+                    />
+                    <Tooltip
+                        h={h}
+                        w={w}
+                        transform={transform}
+                        x={x}
+                        stocks={stocks}
+                    />
                 </svg>
             </div>
         );
@@ -146,8 +133,8 @@ class Chart extends React.Component {
 }
 
 Chart.defaultProps = {
-    width: 600,
-    height: 300,
+    width: 900,
+    height: 500,
     chartId: 'line-chart'
 };
 

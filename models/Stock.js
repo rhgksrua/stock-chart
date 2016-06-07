@@ -7,12 +7,13 @@ const Stock = new Schema({
     id: String,
     dataset_code: String,
     name: String,
-    start_date: Date,
-    end_date: Date,
+    start_date: String,
+    end_date: String,
     column_names: [ String ],
-    data: [ String ],
+    data: [ Schema.Types.Mixed ],
     display: { type: Boolean, default: true }
 });
+
 
 
 module.exports = mongoose.model('Stock', Stock);

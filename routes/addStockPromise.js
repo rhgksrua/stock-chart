@@ -20,6 +20,7 @@ function addStockPromise(stockSymbol) {
             }
             console.log('stock exists... retrieved from db');
             stock.display = true;
+            console.log(stock);
             return stock.save();
         });
 }
@@ -46,6 +47,7 @@ function fetchStockData(stockSymbol) {
 
 function storeFetchedStockData(data) {
     console.log(data.dataset_code);
+    data.display = true;
     const updateQuery = {
         'dataset_code': data.dataset_code
     };

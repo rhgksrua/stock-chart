@@ -6,12 +6,14 @@ class Line extends React.Component {
     }
     
     render() {
-        console.log('-- line', this.props.lineData);
-        //console.log('--------- createing line');
+        console.log('LINE', this.props.stockName, this.props.color);
         return (
-            <g transform={this.props.transform}>
-                <path className='line shadow' d={this.props.lineData} strokeLinecap='round' />
-            </g>
+            <path
+                stroke={this.props.color}
+                className='line shadow' 
+                d={this.props.lineData} 
+                strokeLinecap='round'
+            />
         );
     }
 }

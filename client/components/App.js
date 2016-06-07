@@ -16,23 +16,28 @@ class App extends React.Component {
         const socket = io(url);
         socket.on('add stock', data => {
             //console.log(data);
-            console.log('socket add stock');
+            //console.log('socket add stock', data);
             //socket.emit('add stock', {my: 'data'});
             this.props.addStock(data.stock);
         });
         socket.on('remove stock', data => {
-            console.log('socket remove stock', data);
+            //console.log('socket remove stock', data);
             this.props.removeStock(data.stockSymbol);
         });
         this.props.initializeStocks();
     }
     render() {
         return (
-            <div>
-                <h1>Stock Chart</h1>
+            <div className='app-container'>
+                <header>
+                    <h1>FCC Stock Chart</h1>
+                </header>
                 <Chart />
-                <StockListContainer />
                 <Search />
+                <StockListContainer />
+                <footer>
+                    <p>rhgksrua</p>
+                </footer>
             </div>
         );
     }

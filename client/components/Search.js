@@ -7,21 +7,42 @@ class Search extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            userInput: ''
+            userInput: '',
+            error: ''
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
     handleChange(event) {
-        this.setState({
-            userInput: event.target.value 
-        });
-        console.log(event.target.value);
+        let userInput = event.target.value;
+        this.setState({ userInput });
     }
     handleSubmit(event) {
         event.preventDefault();
-        console.log('submitting');
-        console.log('--user intput', this.state.userInput);
+        let userInput = this.state.userInput;
+        const re = /[a-zA-Z]+/;
+        if (!re.test(userInput)) {
+            this.setState({
+                error: `Invalid`
+            });
+            return;
+        }
+        
+        
+        let stockExists = this.props.stocks.some(stock => {
+            return stock.dataset_code.toUpperCase() === this.state.userInput.toUpperCase();
+        });
+        
+        if (stockExists) {
+            this.setState({
+                error: `${this.state.userInput} Exists!`
+            });
+            return;
+        }
+        this.setState({
+            error: ''
+        });
+        
         this.props.addStock(this.state.userInput);
     }
     render() {
@@ -34,14 +55,14 @@ class Search extends React.Component {
                     />
                     <input type='submit' value='Add' />
                 </form>
+                <div className='error'>{this.state.error}</div>
             </div>
         );
     }
 }
 
 function mapStateToProps(state, ownProps) {
-    return ownProps;
-    
+    return Object.assign({}, ownProps, {stocks: state});
 }
 
 function mapDispatchToProps(dispatch) {
@@ -50,7 +71,6 @@ function mapDispatchToProps(dispatch) {
             dispatch(addStockAJAX(stockSymbol));
         }
     }
-    
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);

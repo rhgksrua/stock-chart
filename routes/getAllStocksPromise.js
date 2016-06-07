@@ -8,7 +8,6 @@ function getAllStocksPromise() {
     };
     return Stock.find(query).exec()
         .then(function(stocks) {
-            //console.log(stocks);
             return stocks;
         });
 }
