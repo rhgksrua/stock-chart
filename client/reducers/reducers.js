@@ -1,4 +1,5 @@
-import { ADD_STOCK, REMOVE_STOCK, INITIALIZE } from '../actions/actions';
+import { combineReducers } from 'redux';
+import { ADD_STOCK, REMOVE_STOCK, INITIALIZE, ERROR } from '../actions/actions';
 
 const initialState = [];
 
@@ -20,5 +21,18 @@ export function stocks(state = initialState, action) {
             return state;
     }
 }
+
+export function error(state = null, action) {
+    console.log('--- error', action.error);
+    switch(action.type) {
+        case ERROR:
+            return action.error;
+        default:
+            return state;
+    }
+}
        
-export default stocks;
+export default combineReducers({
+    stocks,
+    error
+});

@@ -73,13 +73,13 @@
 
 	var _reducers2 = _interopRequireDefault(_reducers);
 
-	var _App = __webpack_require__(190);
+	var _App = __webpack_require__(191);
 
 	var _App2 = _interopRequireDefault(_App);
 
-	__webpack_require__(257);
-
 	__webpack_require__(252);
+
+	__webpack_require__(256);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -87,7 +87,7 @@
 
 	if (true) {
 	    console.log('DEVELOPMENT!');
-	    var createLogger = __webpack_require__(256);
+	    var createLogger = __webpack_require__(258);
 	    var logger = createLogger();
 	    middlewares.push(logger);
 	}
@@ -21282,6 +21282,9 @@
 	    value: true
 	});
 	exports.stocks = stocks;
+	exports.error = error;
+
+	var _redux = __webpack_require__(166);
 
 	var _actions = __webpack_require__(187);
 
@@ -21309,7 +21312,23 @@
 	    }
 	}
 
-	exports.default = stocks;
+	function error() {
+	    var state = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	    var action = arguments[1];
+
+	    console.log('--- error', action.error);
+	    switch (action.type) {
+	        case _actions.ERROR:
+	            return action.error;
+	        default:
+	            return state;
+	    }
+	}
+
+	exports.default = (0, _redux.combineReducers)({
+	    stocks: stocks,
+	    error: error
+	});
 
 /***/ },
 /* 187 */
@@ -21320,13 +21339,13 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.initializeStocks = exports.initialize = exports.removeStockSocket = exports.removeStockAJAX = exports.removeStock = exports.fetchStock = exports.addStockAJAX = exports.addStock = exports.INITIALIZE = exports.REMOVE_STOCK = exports.ADD_STOCK = undefined;
+	exports.initializeStocks = exports.initialize = exports.removeStockSocket = exports.addError = exports.removeStockAJAX = exports.removeStock = exports.fetchStock = exports.addStockAJAX = exports.addStock = exports.ERROR = exports.INITIALIZE = exports.REMOVE_STOCK = exports.ADD_STOCK = undefined;
 
 	var _isomorphicFetch = __webpack_require__(188);
 
 	var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
 
-	var _randomcolor = __webpack_require__(249);
+	var _randomcolor = __webpack_require__(190);
 
 	var _randomcolor2 = _interopRequireDefault(_randomcolor);
 
@@ -21335,6 +21354,7 @@
 	var ADD_STOCK = exports.ADD_STOCK = 'ADD_STOCK';
 	var REMOVE_STOCK = exports.REMOVE_STOCK = 'REMOVE_STOCK';
 	var INITIALIZE = exports.INITIALIZE = 'INITIALIZE';
+	var ERROR = exports.ERROR = 'ERROR';
 
 	var HOST = window.location.protocol + '//' + window.location.host;
 
@@ -21364,6 +21384,7 @@
 	            if (data.error) throw new Error(data.error);
 	            return data;
 	        }).catch(function (err) {
+	            dispatch(addError('Add Stock Error'));
 	            console.warn(err);
 	        });
 	    };
@@ -21398,8 +21419,16 @@
 	            //dispatch(removeStock(stockSymbol));
 	            return data;
 	        }).catch(function (err) {
+	            dispatch(addError('Server Error'));
 	            console.warn(err);
 	        });
+	    };
+	};
+
+	var addError = exports.addError = function addError(error) {
+	    return {
+	        type: ERROR,
+	        error: error
 	    };
 	};
 
@@ -21919,6 +21948,441 @@
 /* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// randomColor by David Merfield under the CC0 license
+	// https://github.com/davidmerfield/randomColor/
+
+	;(function(root, factory) {
+
+	  // Support AMD
+	  if (true) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+	  // Support CommonJS
+	  } else if (typeof exports === 'object') {
+	    var randomColor = factory();
+
+	    // Support NodeJS & Component, which allow module.exports to be a function
+	    if (typeof module === 'object' && module && module.exports) {
+	      exports = module.exports = randomColor;
+	    }
+
+	    // Support CommonJS 1.1.1 spec
+	    exports.randomColor = randomColor;
+
+	  // Support vanilla script loading
+	  } else {
+	    root.randomColor = factory();
+	  }
+
+	}(this, function() {
+
+	  // Seed to get repeatable colors
+	  var seed = null;
+
+	  // Shared color dictionary
+	  var colorDictionary = {};
+
+	  // Populate the color dictionary
+	  loadColorBounds();
+
+	  var randomColor = function (options) {
+
+	    options = options || {};
+
+	    // Check if there is a seed and ensure it's an
+	    // integer. Otherwise, reset the seed value.
+	    if (options.seed && options.seed === parseInt(options.seed, 10)) {
+	      seed = options.seed;
+
+	    // A string was passed as a seed
+	    } else if (typeof options.seed === 'string') {
+	      seed = stringToInteger(options.seed);
+
+	    // Something was passed as a seed but it wasn't an integer or string
+	    } else if (options.seed !== undefined && options.seed !== null) {
+	      throw new TypeError('The seed value must be an integer or string');
+
+	    // No seed, reset the value outside.
+	    } else {
+	      seed = null;
+	    }
+
+	    var H,S,B;
+
+	    // Check if we need to generate multiple colors
+	    if (options.count !== null && options.count !== undefined) {
+
+	      var totalColors = options.count,
+	          colors = [];
+
+	      options.count = null;
+
+	      while (totalColors > colors.length) {
+
+	        // Since we're generating multiple colors,
+	        // incremement the seed. Otherwise we'd just
+	        // generate the same color each time...
+	        if (seed && options.seed) options.seed += 1;
+
+	        colors.push(randomColor(options));
+	      }
+
+	      options.count = totalColors;
+
+	      return colors;
+	    }
+
+	    // First we pick a hue (H)
+	    H = pickHue(options);
+
+	    // Then use H to determine saturation (S)
+	    S = pickSaturation(H, options);
+
+	    // Then use S and H to determine brightness (B).
+	    B = pickBrightness(H, S, options);
+
+	    // Then we return the HSB color in the desired format
+	    return setFormat([H,S,B], options);
+	  };
+
+	  function pickHue (options) {
+
+	    var hueRange = getHueRange(options.hue),
+	        hue = randomWithin(hueRange);
+
+	    // Instead of storing red as two seperate ranges,
+	    // we group them, using negative numbers
+	    if (hue < 0) {hue = 360 + hue;}
+
+	    return hue;
+
+	  }
+
+	  function pickSaturation (hue, options) {
+
+	    if (options.luminosity === 'random') {
+	      return randomWithin([0,100]);
+	    }
+
+	    if (options.hue === 'monochrome') {
+	      return 0;
+	    }
+
+	    var saturationRange = getSaturationRange(hue);
+
+	    var sMin = saturationRange[0],
+	        sMax = saturationRange[1];
+
+	    switch (options.luminosity) {
+
+	      case 'bright':
+	        sMin = 55;
+	        break;
+
+	      case 'dark':
+	        sMin = sMax - 10;
+	        break;
+
+	      case 'light':
+	        sMax = 55;
+	        break;
+	   }
+
+	    return randomWithin([sMin, sMax]);
+
+	  }
+
+	  function pickBrightness (H, S, options) {
+
+	    var bMin = getMinimumBrightness(H, S),
+	        bMax = 100;
+
+	    switch (options.luminosity) {
+
+	      case 'dark':
+	        bMax = bMin + 20;
+	        break;
+
+	      case 'light':
+	        bMin = (bMax + bMin)/2;
+	        break;
+
+	      case 'random':
+	        bMin = 0;
+	        bMax = 100;
+	        break;
+	    }
+
+	    return randomWithin([bMin, bMax]);
+	  }
+
+	  function setFormat (hsv, options) {
+
+	    switch (options.format) {
+
+	      case 'hsvArray':
+	        return hsv;
+
+	      case 'hslArray':
+	        return HSVtoHSL(hsv);
+
+	      case 'hsl':
+	        var hsl = HSVtoHSL(hsv);
+	        return 'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';
+
+	      case 'hsla':
+	        var hslColor = HSVtoHSL(hsv);
+	        return 'hsla('+hslColor[0]+', '+hslColor[1]+'%, '+hslColor[2]+'%, ' + Math.random() + ')';
+
+	      case 'rgbArray':
+	        return HSVtoRGB(hsv);
+
+	      case 'rgb':
+	        var rgb = HSVtoRGB(hsv);
+	        return 'rgb(' + rgb.join(', ') + ')';
+
+	      case 'rgba':
+	        var rgbColor = HSVtoRGB(hsv);
+	        return 'rgba(' + rgbColor.join(', ') + ', ' + Math.random() + ')';
+
+	      default:
+	        return HSVtoHex(hsv);
+	    }
+
+	  }
+
+	  function getMinimumBrightness(H, S) {
+
+	    var lowerBounds = getColorInfo(H).lowerBounds;
+
+	    for (var i = 0; i < lowerBounds.length - 1; i++) {
+
+	      var s1 = lowerBounds[i][0],
+	          v1 = lowerBounds[i][1];
+
+	      var s2 = lowerBounds[i+1][0],
+	          v2 = lowerBounds[i+1][1];
+
+	      if (S >= s1 && S <= s2) {
+
+	         var m = (v2 - v1)/(s2 - s1),
+	             b = v1 - m*s1;
+
+	         return m*S + b;
+	      }
+
+	    }
+
+	    return 0;
+	  }
+
+	  function getHueRange (colorInput) {
+
+	    if (typeof parseInt(colorInput) === 'number') {
+
+	      var number = parseInt(colorInput);
+
+	      if (number < 360 && number > 0) {
+	        return [number, number];
+	      }
+
+	    }
+
+	    if (typeof colorInput === 'string') {
+
+	      if (colorDictionary[colorInput]) {
+	        var color = colorDictionary[colorInput];
+	        if (color.hueRange) {return color.hueRange;}
+	      }
+	    }
+
+	    return [0,360];
+
+	  }
+
+	  function getSaturationRange (hue) {
+	    return getColorInfo(hue).saturationRange;
+	  }
+
+	  function getColorInfo (hue) {
+
+	    // Maps red colors to make picking hue easier
+	    if (hue >= 334 && hue <= 360) {
+	      hue-= 360;
+	    }
+
+	    for (var colorName in colorDictionary) {
+	       var color = colorDictionary[colorName];
+	       if (color.hueRange &&
+	           hue >= color.hueRange[0] &&
+	           hue <= color.hueRange[1]) {
+	          return colorDictionary[colorName];
+	       }
+	    } return 'Color not found';
+	  }
+
+	  function randomWithin (range) {
+	    if (seed === null) {
+	      return Math.floor(range[0] + Math.random()*(range[1] + 1 - range[0]));
+	    } else {
+	      //Seeded random algorithm from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
+	      var max = range[1] || 1;
+	      var min = range[0] || 0;
+	      seed = (seed * 9301 + 49297) % 233280;
+	      var rnd = seed / 233280.0;
+	      return Math.floor(min + rnd * (max - min));
+	    }
+	  }
+
+	  function HSVtoHex (hsv){
+
+	    var rgb = HSVtoRGB(hsv);
+
+	    function componentToHex(c) {
+	        var hex = c.toString(16);
+	        return hex.length == 1 ? '0' + hex : hex;
+	    }
+
+	    var hex = '#' + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
+
+	    return hex;
+
+	  }
+
+	  function defineColor (name, hueRange, lowerBounds) {
+
+	    var sMin = lowerBounds[0][0],
+	        sMax = lowerBounds[lowerBounds.length - 1][0],
+
+	        bMin = lowerBounds[lowerBounds.length - 1][1],
+	        bMax = lowerBounds[0][1];
+
+	    colorDictionary[name] = {
+	      hueRange: hueRange,
+	      lowerBounds: lowerBounds,
+	      saturationRange: [sMin, sMax],
+	      brightnessRange: [bMin, bMax]
+	    };
+
+	  }
+
+	  function loadColorBounds () {
+
+	    defineColor(
+	      'monochrome',
+	      null,
+	      [[0,0],[100,0]]
+	    );
+
+	    defineColor(
+	      'red',
+	      [-26,18],
+	      [[20,100],[30,92],[40,89],[50,85],[60,78],[70,70],[80,60],[90,55],[100,50]]
+	    );
+
+	    defineColor(
+	      'orange',
+	      [19,46],
+	      [[20,100],[30,93],[40,88],[50,86],[60,85],[70,70],[100,70]]
+	    );
+
+	    defineColor(
+	      'yellow',
+	      [47,62],
+	      [[25,100],[40,94],[50,89],[60,86],[70,84],[80,82],[90,80],[100,75]]
+	    );
+
+	    defineColor(
+	      'green',
+	      [63,178],
+	      [[30,100],[40,90],[50,85],[60,81],[70,74],[80,64],[90,50],[100,40]]
+	    );
+
+	    defineColor(
+	      'blue',
+	      [179, 257],
+	      [[20,100],[30,86],[40,80],[50,74],[60,60],[70,52],[80,44],[90,39],[100,35]]
+	    );
+
+	    defineColor(
+	      'purple',
+	      [258, 282],
+	      [[20,100],[30,87],[40,79],[50,70],[60,65],[70,59],[80,52],[90,45],[100,42]]
+	    );
+
+	    defineColor(
+	      'pink',
+	      [283, 334],
+	      [[20,100],[30,90],[40,86],[60,84],[80,80],[90,75],[100,73]]
+	    );
+
+	  }
+
+	  function HSVtoRGB (hsv) {
+
+	    // this doesn't work for the values of 0 and 360
+	    // here's the hacky fix
+	    var h = hsv[0];
+	    if (h === 0) {h = 1;}
+	    if (h === 360) {h = 359;}
+
+	    // Rebase the h,s,v values
+	    h = h/360;
+	    var s = hsv[1]/100,
+	        v = hsv[2]/100;
+
+	    var h_i = Math.floor(h*6),
+	      f = h * 6 - h_i,
+	      p = v * (1 - s),
+	      q = v * (1 - f*s),
+	      t = v * (1 - (1 - f)*s),
+	      r = 256,
+	      g = 256,
+	      b = 256;
+
+	    switch(h_i) {
+	      case 0: r = v; g = t; b = p;  break;
+	      case 1: r = q; g = v; b = p;  break;
+	      case 2: r = p; g = v; b = t;  break;
+	      case 3: r = p; g = q; b = v;  break;
+	      case 4: r = t; g = p; b = v;  break;
+	      case 5: r = v; g = p; b = q;  break;
+	    }
+
+	    var result = [Math.floor(r*255), Math.floor(g*255), Math.floor(b*255)];
+	    return result;
+	  }
+
+	  function HSVtoHSL (hsv) {
+	    var h = hsv[0],
+	      s = hsv[1]/100,
+	      v = hsv[2]/100,
+	      k = (2-s)*v;
+
+	    return [
+	      h,
+	      Math.round(s*v / (k<1 ? k : 2-k) * 10000) / 100,
+	      k/2 * 100
+	    ];
+	  }
+
+	  function stringToInteger (string) {
+	    var total = 0
+	    for (var i = 0; i !== string.length; i++) {
+	      if (total >= Number.MAX_SAFE_INTEGER) break;
+	      total += string.charCodeAt(i)
+	    }
+	    return total
+	  }
+
+	  return randomColor;
+	}));
+
+
+/***/ },
+/* 191 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -21933,21 +22397,21 @@
 
 	var _reactRedux = __webpack_require__(159);
 
-	var _socket = __webpack_require__(191);
+	var _socket = __webpack_require__(192);
 
 	var _socket2 = _interopRequireDefault(_socket);
 
 	var _actions = __webpack_require__(187);
 
-	var _StockListContainer = __webpack_require__(241);
+	var _StockListContainer = __webpack_require__(242);
 
 	var _StockListContainer2 = _interopRequireDefault(_StockListContainer);
 
-	var _Search = __webpack_require__(245);
+	var _Search = __webpack_require__(246);
 
 	var _Search2 = _interopRequireDefault(_Search);
 
-	var _Chart = __webpack_require__(246);
+	var _Chart = __webpack_require__(247);
 
 	var _Chart2 = _interopRequireDefault(_Chart);
 
@@ -22009,8 +22473,8 @@
 	                    'footer',
 	                    null,
 	                    _react2.default.createElement(
-	                        'p',
-	                        null,
+	                        'a',
+	                        { href: 'https://github.com/rhgksrua/stock-chart' },
 	                        'rhgksrua'
 	                    )
 	                )
@@ -22042,7 +22506,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(App);
 
 /***/ },
-/* 191 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -22050,10 +22514,10 @@
 	 * Module dependencies.
 	 */
 
-	var url = __webpack_require__(192);
-	var parser = __webpack_require__(197);
-	var Manager = __webpack_require__(205);
-	var debug = __webpack_require__(194)('socket.io-client');
+	var url = __webpack_require__(193);
+	var parser = __webpack_require__(198);
+	var Manager = __webpack_require__(206);
+	var debug = __webpack_require__(195)('socket.io-client');
 
 	/**
 	 * Module exports.
@@ -22135,12 +22599,12 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(205);
-	exports.Socket = __webpack_require__(233);
+	exports.Manager = __webpack_require__(206);
+	exports.Socket = __webpack_require__(234);
 
 
 /***/ },
-/* 192 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -22148,8 +22612,8 @@
 	 * Module dependencies.
 	 */
 
-	var parseuri = __webpack_require__(193);
-	var debug = __webpack_require__(194)('socket.io-client:url');
+	var parseuri = __webpack_require__(194);
+	var debug = __webpack_require__(195)('socket.io-client:url');
 
 	/**
 	 * Module exports.
@@ -22223,7 +22687,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 193 */
+/* 194 */
 /***/ function(module, exports) {
 
 	/**
@@ -22268,7 +22732,7 @@
 
 
 /***/ },
-/* 194 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -22278,7 +22742,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(195);
+	exports = module.exports = __webpack_require__(196);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -22442,7 +22906,7 @@
 
 
 /***/ },
-/* 195 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -22458,7 +22922,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(196);
+	exports.humanize = __webpack_require__(197);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -22645,7 +23109,7 @@
 
 
 /***/ },
-/* 196 */
+/* 197 */
 /***/ function(module, exports) {
 
 	/**
@@ -22776,7 +23240,7 @@
 
 
 /***/ },
-/* 197 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -22784,12 +23248,12 @@
 	 * Module dependencies.
 	 */
 
-	var debug = __webpack_require__(194)('socket.io-parser');
-	var json = __webpack_require__(198);
-	var isArray = __webpack_require__(201);
-	var Emitter = __webpack_require__(202);
-	var binary = __webpack_require__(203);
-	var isBuf = __webpack_require__(204);
+	var debug = __webpack_require__(195)('socket.io-parser');
+	var json = __webpack_require__(199);
+	var isArray = __webpack_require__(202);
+	var Emitter = __webpack_require__(203);
+	var binary = __webpack_require__(204);
+	var isBuf = __webpack_require__(205);
 
 	/**
 	 * Protocol version.
@@ -23182,14 +23646,14 @@
 
 
 /***/ },
-/* 198 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(200);
+	  var isLoader = "function" === "function" && __webpack_require__(201);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -24088,10 +24552,10 @@
 	  }
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(199)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(200)(module), (function() { return this; }())))
 
 /***/ },
-/* 199 */
+/* 200 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -24107,7 +24571,7 @@
 
 
 /***/ },
-/* 200 */
+/* 201 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -24115,7 +24579,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 201 */
+/* 202 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -24124,7 +24588,7 @@
 
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports) {
 
 	
@@ -24294,7 +24758,7 @@
 
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -24303,8 +24767,8 @@
 	 * Module requirements
 	 */
 
-	var isArray = __webpack_require__(201);
-	var isBuf = __webpack_require__(204);
+	var isArray = __webpack_require__(202);
+	var isBuf = __webpack_require__(205);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -24442,7 +24906,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 204 */
+/* 205 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -24462,7 +24926,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 205 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -24470,15 +24934,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(206);
-	var Socket = __webpack_require__(233);
-	var Emitter = __webpack_require__(234);
-	var parser = __webpack_require__(197);
-	var on = __webpack_require__(236);
-	var bind = __webpack_require__(237);
-	var debug = __webpack_require__(194)('socket.io-client:manager');
-	var indexOf = __webpack_require__(231);
-	var Backoff = __webpack_require__(240);
+	var eio = __webpack_require__(207);
+	var Socket = __webpack_require__(234);
+	var Emitter = __webpack_require__(235);
+	var parser = __webpack_require__(198);
+	var on = __webpack_require__(237);
+	var bind = __webpack_require__(238);
+	var debug = __webpack_require__(195)('socket.io-client:manager');
+	var indexOf = __webpack_require__(232);
+	var Backoff = __webpack_require__(241);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -25025,19 +25489,19 @@
 
 
 /***/ },
-/* 206 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	module.exports =  __webpack_require__(207);
-
-
-/***/ },
 /* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(208);
+	module.exports =  __webpack_require__(208);
+
+
+/***/ },
+/* 208 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	module.exports = __webpack_require__(209);
 
 	/**
 	 * Exports parser
@@ -25045,25 +25509,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(215);
+	module.exports.parser = __webpack_require__(216);
 
 
 /***/ },
-/* 208 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(209);
-	var Emitter = __webpack_require__(224);
-	var debug = __webpack_require__(194)('engine.io-client:socket');
-	var index = __webpack_require__(231);
-	var parser = __webpack_require__(215);
-	var parseuri = __webpack_require__(193);
-	var parsejson = __webpack_require__(232);
-	var parseqs = __webpack_require__(225);
+	var transports = __webpack_require__(210);
+	var Emitter = __webpack_require__(225);
+	var debug = __webpack_require__(195)('engine.io-client:socket');
+	var index = __webpack_require__(232);
+	var parser = __webpack_require__(216);
+	var parseuri = __webpack_require__(194);
+	var parsejson = __webpack_require__(233);
+	var parseqs = __webpack_require__(226);
 
 	/**
 	 * Module exports.
@@ -25187,9 +25651,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(214);
-	Socket.transports = __webpack_require__(209);
-	Socket.parser = __webpack_require__(215);
+	Socket.Transport = __webpack_require__(215);
+	Socket.transports = __webpack_require__(210);
+	Socket.parser = __webpack_require__(216);
 
 	/**
 	 * Creates transport of the given type.
@@ -25784,17 +26248,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 209 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(210);
-	var XHR = __webpack_require__(212);
-	var JSONP = __webpack_require__(228);
-	var websocket = __webpack_require__(229);
+	var XMLHttpRequest = __webpack_require__(211);
+	var XHR = __webpack_require__(213);
+	var JSONP = __webpack_require__(229);
+	var websocket = __webpack_require__(230);
 
 	/**
 	 * Export transports.
@@ -25844,11 +26308,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 210 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// browser shim for xmlhttprequest module
-	var hasCORS = __webpack_require__(211);
+	var hasCORS = __webpack_require__(212);
 
 	module.exports = function(opts) {
 	  var xdomain = opts.xdomain;
@@ -25886,7 +26350,7 @@
 
 
 /***/ },
-/* 211 */
+/* 212 */
 /***/ function(module, exports) {
 
 	
@@ -25909,18 +26373,18 @@
 
 
 /***/ },
-/* 212 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(210);
-	var Polling = __webpack_require__(213);
-	var Emitter = __webpack_require__(224);
-	var inherit = __webpack_require__(226);
-	var debug = __webpack_require__(194)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(211);
+	var Polling = __webpack_require__(214);
+	var Emitter = __webpack_require__(225);
+	var inherit = __webpack_require__(227);
+	var debug = __webpack_require__(195)('engine.io-client:polling-xhr');
 
 	/**
 	 * Module exports.
@@ -26328,19 +26792,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 213 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(214);
-	var parseqs = __webpack_require__(225);
-	var parser = __webpack_require__(215);
-	var inherit = __webpack_require__(226);
-	var yeast = __webpack_require__(227);
-	var debug = __webpack_require__(194)('engine.io-client:polling');
+	var Transport = __webpack_require__(215);
+	var parseqs = __webpack_require__(226);
+	var parser = __webpack_require__(216);
+	var inherit = __webpack_require__(227);
+	var yeast = __webpack_require__(228);
+	var debug = __webpack_require__(195)('engine.io-client:polling');
 
 	/**
 	 * Module exports.
@@ -26353,7 +26817,7 @@
 	 */
 
 	var hasXHR2 = (function() {
-	  var XMLHttpRequest = __webpack_require__(210);
+	  var XMLHttpRequest = __webpack_require__(211);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -26581,15 +27045,15 @@
 
 
 /***/ },
-/* 214 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(215);
-	var Emitter = __webpack_require__(224);
+	var parser = __webpack_require__(216);
+	var Emitter = __webpack_require__(225);
 
 	/**
 	 * Module exports.
@@ -26742,19 +27206,19 @@
 
 
 /***/ },
-/* 215 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(216);
-	var hasBinary = __webpack_require__(217);
-	var sliceBuffer = __webpack_require__(219);
-	var base64encoder = __webpack_require__(220);
-	var after = __webpack_require__(221);
-	var utf8 = __webpack_require__(222);
+	var keys = __webpack_require__(217);
+	var hasBinary = __webpack_require__(218);
+	var sliceBuffer = __webpack_require__(220);
+	var base64encoder = __webpack_require__(221);
+	var after = __webpack_require__(222);
+	var utf8 = __webpack_require__(223);
 
 	/**
 	 * Check if we are running an android browser. That requires us to use
@@ -26811,7 +27275,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(223);
+	var Blob = __webpack_require__(224);
 
 	/**
 	 * Encodes a packet.
@@ -27343,7 +27807,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 216 */
+/* 217 */
 /***/ function(module, exports) {
 
 	
@@ -27368,7 +27832,7 @@
 
 
 /***/ },
-/* 217 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -27376,7 +27840,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(218);
+	var isArray = __webpack_require__(219);
 
 	/**
 	 * Module exports.
@@ -27433,7 +27897,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 218 */
+/* 219 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -27442,7 +27906,7 @@
 
 
 /***/ },
-/* 219 */
+/* 220 */
 /***/ function(module, exports) {
 
 	/**
@@ -27477,7 +27941,7 @@
 
 
 /***/ },
-/* 220 */
+/* 221 */
 /***/ function(module, exports) {
 
 	/*
@@ -27542,7 +28006,7 @@
 
 
 /***/ },
-/* 221 */
+/* 222 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -27576,7 +28040,7 @@
 
 
 /***/ },
-/* 222 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/utf8js v2.0.0 by @mathias */
@@ -27822,10 +28286,10 @@
 
 	}(this));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(199)(module), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(200)(module), (function() { return this; }())))
 
 /***/ },
-/* 223 */
+/* 224 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -27928,7 +28392,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 224 */
+/* 225 */
 /***/ function(module, exports) {
 
 	
@@ -28098,7 +28562,7 @@
 
 
 /***/ },
-/* 225 */
+/* 226 */
 /***/ function(module, exports) {
 
 	/**
@@ -28141,7 +28605,7 @@
 
 
 /***/ },
-/* 226 */
+/* 227 */
 /***/ function(module, exports) {
 
 	
@@ -28153,7 +28617,7 @@
 	};
 
 /***/ },
-/* 227 */
+/* 228 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28227,7 +28691,7 @@
 
 
 /***/ },
-/* 228 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -28235,8 +28699,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(213);
-	var inherit = __webpack_require__(226);
+	var Polling = __webpack_require__(214);
+	var inherit = __webpack_require__(227);
 
 	/**
 	 * Module exports.
@@ -28472,19 +28936,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 229 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(214);
-	var parser = __webpack_require__(215);
-	var parseqs = __webpack_require__(225);
-	var inherit = __webpack_require__(226);
-	var yeast = __webpack_require__(227);
-	var debug = __webpack_require__(194)('engine.io-client:websocket');
+	var Transport = __webpack_require__(215);
+	var parser = __webpack_require__(216);
+	var parseqs = __webpack_require__(226);
+	var inherit = __webpack_require__(227);
+	var yeast = __webpack_require__(228);
+	var debug = __webpack_require__(195)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 	/**
@@ -28496,7 +28960,7 @@
 	var WebSocket = BrowserWebSocket;
 	if (!WebSocket && typeof window === 'undefined') {
 	  try {
-	    WebSocket = __webpack_require__(230);
+	    WebSocket = __webpack_require__(231);
 	  } catch (e) { }
 	}
 
@@ -28767,13 +29231,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 230 */
+/* 231 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 231 */
+/* 232 */
 /***/ function(module, exports) {
 
 	
@@ -28788,7 +29252,7 @@
 	};
 
 /***/ },
-/* 232 */
+/* 233 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -28826,7 +29290,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 233 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -28834,13 +29298,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(197);
-	var Emitter = __webpack_require__(234);
-	var toArray = __webpack_require__(235);
-	var on = __webpack_require__(236);
-	var bind = __webpack_require__(237);
-	var debug = __webpack_require__(194)('socket.io-client:socket');
-	var hasBin = __webpack_require__(238);
+	var parser = __webpack_require__(198);
+	var Emitter = __webpack_require__(235);
+	var toArray = __webpack_require__(236);
+	var on = __webpack_require__(237);
+	var bind = __webpack_require__(238);
+	var debug = __webpack_require__(195)('socket.io-client:socket');
+	var hasBin = __webpack_require__(239);
 
 	/**
 	 * Module exports.
@@ -29244,7 +29708,7 @@
 
 
 /***/ },
-/* 234 */
+/* 235 */
 /***/ function(module, exports) {
 
 	
@@ -29411,7 +29875,7 @@
 
 
 /***/ },
-/* 235 */
+/* 236 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -29430,7 +29894,7 @@
 
 
 /***/ },
-/* 236 */
+/* 237 */
 /***/ function(module, exports) {
 
 	
@@ -29460,7 +29924,7 @@
 
 
 /***/ },
-/* 237 */
+/* 238 */
 /***/ function(module, exports) {
 
 	/**
@@ -29489,7 +29953,7 @@
 
 
 /***/ },
-/* 238 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -29497,7 +29961,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(239);
+	var isArray = __webpack_require__(240);
 
 	/**
 	 * Module exports.
@@ -29555,7 +30019,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 239 */
+/* 240 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -29564,7 +30028,7 @@
 
 
 /***/ },
-/* 240 */
+/* 241 */
 /***/ function(module, exports) {
 
 	
@@ -29655,7 +30119,7 @@
 
 
 /***/ },
-/* 241 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29666,7 +30130,7 @@
 
 	var _reactRedux = __webpack_require__(159);
 
-	var _StockList = __webpack_require__(242);
+	var _StockList = __webpack_require__(243);
 
 	var _StockList2 = _interopRequireDefault(_StockList);
 
@@ -29674,14 +30138,14 @@
 
 	function mapStateToProps(state) {
 	    return {
-	        stocks: state
+	        stocks: state.stocks
 	    };
 	}
 
 	exports.default = (0, _reactRedux.connect)(mapStateToProps)(_StockList2.default);
 
 /***/ },
-/* 242 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29696,7 +30160,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _StockContainer = __webpack_require__(243);
+	var _StockContainer = __webpack_require__(244);
 
 	var _StockContainer2 = _interopRequireDefault(_StockContainer);
 
@@ -29742,7 +30206,7 @@
 	exports.default = StockList;
 
 /***/ },
-/* 243 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29753,7 +30217,7 @@
 
 	var _reactRedux = __webpack_require__(159);
 
-	var _Stock = __webpack_require__(244);
+	var _Stock = __webpack_require__(245);
 
 	var _Stock2 = _interopRequireDefault(_Stock);
 
@@ -29778,7 +30242,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_Stock2.default);
 
 /***/ },
-/* 244 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29839,7 +30303,7 @@
 	exports.default = Stock;
 
 /***/ },
-/* 245 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29896,11 +30360,12 @@
 
 	            event.preventDefault();
 	            var userInput = this.state.userInput;
-	            var re = /[a-zA-Z]+/;
+	            var re = /^[a-zA-Z]{2,6}$/;
 	            if (!re.test(userInput)) {
 	                this.setState({
-	                    error: 'Invalid'
+	                    error: 'Invalid Input'
 	                });
+	                this.props.updateError('');
 	                return;
 	            }
 
@@ -29925,20 +30390,26 @@
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: 'search-container' },
 	                _react2.default.createElement(
 	                    'form',
-	                    { onSubmit: this.handleSubmit },
+	                    { className: 'search-form', onSubmit: this.handleSubmit },
 	                    _react2.default.createElement('input', {
+	                        className: 'search-input',
 	                        type: 'text',
 	                        onChange: this.handleChange
 	                    }),
-	                    _react2.default.createElement('input', { type: 'submit', value: 'Add' })
+	                    _react2.default.createElement('input', { className: 'search-submit', type: 'submit', value: 'Add' })
 	                ),
-	                _react2.default.createElement(
+	                this.state.error && _react2.default.createElement(
 	                    'div',
 	                    { className: 'error' },
 	                    this.state.error
+	                ),
+	                this.props.error && _react2.default.createElement(
+	                    'div',
+	                    { className: 'error' },
+	                    this.props.error
 	                )
 	            );
 	        }
@@ -29948,13 +30419,16 @@
 	}(_react2.default.Component);
 
 	function mapStateToProps(state, ownProps) {
-	    return Object.assign({}, ownProps, { stocks: state });
+	    return Object.assign({}, ownProps, { stocks: state.stocks, error: state.error });
 	}
 
 	function mapDispatchToProps(dispatch) {
 	    return {
 	        addStock: function addStock(stockSymbol) {
 	            dispatch((0, _actions.addStockAJAX)(stockSymbol));
+	        },
+	        updateError: function updateError(error) {
+	            dispatch((0, _actions.addError)(''));
 	        }
 	    };
 	}
@@ -29962,7 +30436,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(Search);
 
 /***/ },
-/* 246 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29977,13 +30451,13 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _d = __webpack_require__(247);
+	var _d = __webpack_require__(248);
 
 	var _d2 = _interopRequireDefault(_d);
 
 	var _reactRedux = __webpack_require__(159);
 
-	var _Line = __webpack_require__(248);
+	var _Line = __webpack_require__(249);
 
 	var _Line2 = _interopRequireDefault(_Line);
 
@@ -30150,7 +30624,7 @@
 	};
 
 	function mapStateToProps(state, ownProps) {
-	    var stocks = state;
+	    var stocks = state.stocks;
 	    return {
 	        stocks: stocks
 	    };
@@ -30159,7 +30633,7 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps)(Chart);
 
 /***/ },
-/* 247 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;!function() {
@@ -39718,7 +40192,7 @@
 	}();
 
 /***/ },
-/* 248 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39769,441 +40243,6 @@
 	exports.default = Line;
 
 /***/ },
-/* 249 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// randomColor by David Merfield under the CC0 license
-	// https://github.com/davidmerfield/randomColor/
-
-	;(function(root, factory) {
-
-	  // Support AMD
-	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-
-	  // Support CommonJS
-	  } else if (typeof exports === 'object') {
-	    var randomColor = factory();
-
-	    // Support NodeJS & Component, which allow module.exports to be a function
-	    if (typeof module === 'object' && module && module.exports) {
-	      exports = module.exports = randomColor;
-	    }
-
-	    // Support CommonJS 1.1.1 spec
-	    exports.randomColor = randomColor;
-
-	  // Support vanilla script loading
-	  } else {
-	    root.randomColor = factory();
-	  }
-
-	}(this, function() {
-
-	  // Seed to get repeatable colors
-	  var seed = null;
-
-	  // Shared color dictionary
-	  var colorDictionary = {};
-
-	  // Populate the color dictionary
-	  loadColorBounds();
-
-	  var randomColor = function (options) {
-
-	    options = options || {};
-
-	    // Check if there is a seed and ensure it's an
-	    // integer. Otherwise, reset the seed value.
-	    if (options.seed && options.seed === parseInt(options.seed, 10)) {
-	      seed = options.seed;
-
-	    // A string was passed as a seed
-	    } else if (typeof options.seed === 'string') {
-	      seed = stringToInteger(options.seed);
-
-	    // Something was passed as a seed but it wasn't an integer or string
-	    } else if (options.seed !== undefined && options.seed !== null) {
-	      throw new TypeError('The seed value must be an integer or string');
-
-	    // No seed, reset the value outside.
-	    } else {
-	      seed = null;
-	    }
-
-	    var H,S,B;
-
-	    // Check if we need to generate multiple colors
-	    if (options.count !== null && options.count !== undefined) {
-
-	      var totalColors = options.count,
-	          colors = [];
-
-	      options.count = null;
-
-	      while (totalColors > colors.length) {
-
-	        // Since we're generating multiple colors,
-	        // incremement the seed. Otherwise we'd just
-	        // generate the same color each time...
-	        if (seed && options.seed) options.seed += 1;
-
-	        colors.push(randomColor(options));
-	      }
-
-	      options.count = totalColors;
-
-	      return colors;
-	    }
-
-	    // First we pick a hue (H)
-	    H = pickHue(options);
-
-	    // Then use H to determine saturation (S)
-	    S = pickSaturation(H, options);
-
-	    // Then use S and H to determine brightness (B).
-	    B = pickBrightness(H, S, options);
-
-	    // Then we return the HSB color in the desired format
-	    return setFormat([H,S,B], options);
-	  };
-
-	  function pickHue (options) {
-
-	    var hueRange = getHueRange(options.hue),
-	        hue = randomWithin(hueRange);
-
-	    // Instead of storing red as two seperate ranges,
-	    // we group them, using negative numbers
-	    if (hue < 0) {hue = 360 + hue;}
-
-	    return hue;
-
-	  }
-
-	  function pickSaturation (hue, options) {
-
-	    if (options.luminosity === 'random') {
-	      return randomWithin([0,100]);
-	    }
-
-	    if (options.hue === 'monochrome') {
-	      return 0;
-	    }
-
-	    var saturationRange = getSaturationRange(hue);
-
-	    var sMin = saturationRange[0],
-	        sMax = saturationRange[1];
-
-	    switch (options.luminosity) {
-
-	      case 'bright':
-	        sMin = 55;
-	        break;
-
-	      case 'dark':
-	        sMin = sMax - 10;
-	        break;
-
-	      case 'light':
-	        sMax = 55;
-	        break;
-	   }
-
-	    return randomWithin([sMin, sMax]);
-
-	  }
-
-	  function pickBrightness (H, S, options) {
-
-	    var bMin = getMinimumBrightness(H, S),
-	        bMax = 100;
-
-	    switch (options.luminosity) {
-
-	      case 'dark':
-	        bMax = bMin + 20;
-	        break;
-
-	      case 'light':
-	        bMin = (bMax + bMin)/2;
-	        break;
-
-	      case 'random':
-	        bMin = 0;
-	        bMax = 100;
-	        break;
-	    }
-
-	    return randomWithin([bMin, bMax]);
-	  }
-
-	  function setFormat (hsv, options) {
-
-	    switch (options.format) {
-
-	      case 'hsvArray':
-	        return hsv;
-
-	      case 'hslArray':
-	        return HSVtoHSL(hsv);
-
-	      case 'hsl':
-	        var hsl = HSVtoHSL(hsv);
-	        return 'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';
-
-	      case 'hsla':
-	        var hslColor = HSVtoHSL(hsv);
-	        return 'hsla('+hslColor[0]+', '+hslColor[1]+'%, '+hslColor[2]+'%, ' + Math.random() + ')';
-
-	      case 'rgbArray':
-	        return HSVtoRGB(hsv);
-
-	      case 'rgb':
-	        var rgb = HSVtoRGB(hsv);
-	        return 'rgb(' + rgb.join(', ') + ')';
-
-	      case 'rgba':
-	        var rgbColor = HSVtoRGB(hsv);
-	        return 'rgba(' + rgbColor.join(', ') + ', ' + Math.random() + ')';
-
-	      default:
-	        return HSVtoHex(hsv);
-	    }
-
-	  }
-
-	  function getMinimumBrightness(H, S) {
-
-	    var lowerBounds = getColorInfo(H).lowerBounds;
-
-	    for (var i = 0; i < lowerBounds.length - 1; i++) {
-
-	      var s1 = lowerBounds[i][0],
-	          v1 = lowerBounds[i][1];
-
-	      var s2 = lowerBounds[i+1][0],
-	          v2 = lowerBounds[i+1][1];
-
-	      if (S >= s1 && S <= s2) {
-
-	         var m = (v2 - v1)/(s2 - s1),
-	             b = v1 - m*s1;
-
-	         return m*S + b;
-	      }
-
-	    }
-
-	    return 0;
-	  }
-
-	  function getHueRange (colorInput) {
-
-	    if (typeof parseInt(colorInput) === 'number') {
-
-	      var number = parseInt(colorInput);
-
-	      if (number < 360 && number > 0) {
-	        return [number, number];
-	      }
-
-	    }
-
-	    if (typeof colorInput === 'string') {
-
-	      if (colorDictionary[colorInput]) {
-	        var color = colorDictionary[colorInput];
-	        if (color.hueRange) {return color.hueRange;}
-	      }
-	    }
-
-	    return [0,360];
-
-	  }
-
-	  function getSaturationRange (hue) {
-	    return getColorInfo(hue).saturationRange;
-	  }
-
-	  function getColorInfo (hue) {
-
-	    // Maps red colors to make picking hue easier
-	    if (hue >= 334 && hue <= 360) {
-	      hue-= 360;
-	    }
-
-	    for (var colorName in colorDictionary) {
-	       var color = colorDictionary[colorName];
-	       if (color.hueRange &&
-	           hue >= color.hueRange[0] &&
-	           hue <= color.hueRange[1]) {
-	          return colorDictionary[colorName];
-	       }
-	    } return 'Color not found';
-	  }
-
-	  function randomWithin (range) {
-	    if (seed === null) {
-	      return Math.floor(range[0] + Math.random()*(range[1] + 1 - range[0]));
-	    } else {
-	      //Seeded random algorithm from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
-	      var max = range[1] || 1;
-	      var min = range[0] || 0;
-	      seed = (seed * 9301 + 49297) % 233280;
-	      var rnd = seed / 233280.0;
-	      return Math.floor(min + rnd * (max - min));
-	    }
-	  }
-
-	  function HSVtoHex (hsv){
-
-	    var rgb = HSVtoRGB(hsv);
-
-	    function componentToHex(c) {
-	        var hex = c.toString(16);
-	        return hex.length == 1 ? '0' + hex : hex;
-	    }
-
-	    var hex = '#' + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
-
-	    return hex;
-
-	  }
-
-	  function defineColor (name, hueRange, lowerBounds) {
-
-	    var sMin = lowerBounds[0][0],
-	        sMax = lowerBounds[lowerBounds.length - 1][0],
-
-	        bMin = lowerBounds[lowerBounds.length - 1][1],
-	        bMax = lowerBounds[0][1];
-
-	    colorDictionary[name] = {
-	      hueRange: hueRange,
-	      lowerBounds: lowerBounds,
-	      saturationRange: [sMin, sMax],
-	      brightnessRange: [bMin, bMax]
-	    };
-
-	  }
-
-	  function loadColorBounds () {
-
-	    defineColor(
-	      'monochrome',
-	      null,
-	      [[0,0],[100,0]]
-	    );
-
-	    defineColor(
-	      'red',
-	      [-26,18],
-	      [[20,100],[30,92],[40,89],[50,85],[60,78],[70,70],[80,60],[90,55],[100,50]]
-	    );
-
-	    defineColor(
-	      'orange',
-	      [19,46],
-	      [[20,100],[30,93],[40,88],[50,86],[60,85],[70,70],[100,70]]
-	    );
-
-	    defineColor(
-	      'yellow',
-	      [47,62],
-	      [[25,100],[40,94],[50,89],[60,86],[70,84],[80,82],[90,80],[100,75]]
-	    );
-
-	    defineColor(
-	      'green',
-	      [63,178],
-	      [[30,100],[40,90],[50,85],[60,81],[70,74],[80,64],[90,50],[100,40]]
-	    );
-
-	    defineColor(
-	      'blue',
-	      [179, 257],
-	      [[20,100],[30,86],[40,80],[50,74],[60,60],[70,52],[80,44],[90,39],[100,35]]
-	    );
-
-	    defineColor(
-	      'purple',
-	      [258, 282],
-	      [[20,100],[30,87],[40,79],[50,70],[60,65],[70,59],[80,52],[90,45],[100,42]]
-	    );
-
-	    defineColor(
-	      'pink',
-	      [283, 334],
-	      [[20,100],[30,90],[40,86],[60,84],[80,80],[90,75],[100,73]]
-	    );
-
-	  }
-
-	  function HSVtoRGB (hsv) {
-
-	    // this doesn't work for the values of 0 and 360
-	    // here's the hacky fix
-	    var h = hsv[0];
-	    if (h === 0) {h = 1;}
-	    if (h === 360) {h = 359;}
-
-	    // Rebase the h,s,v values
-	    h = h/360;
-	    var s = hsv[1]/100,
-	        v = hsv[2]/100;
-
-	    var h_i = Math.floor(h*6),
-	      f = h * 6 - h_i,
-	      p = v * (1 - s),
-	      q = v * (1 - f*s),
-	      t = v * (1 - (1 - f)*s),
-	      r = 256,
-	      g = 256,
-	      b = 256;
-
-	    switch(h_i) {
-	      case 0: r = v; g = t; b = p;  break;
-	      case 1: r = q; g = v; b = p;  break;
-	      case 2: r = p; g = v; b = t;  break;
-	      case 3: r = p; g = q; b = v;  break;
-	      case 4: r = t; g = p; b = v;  break;
-	      case 5: r = v; g = p; b = q;  break;
-	    }
-
-	    var result = [Math.floor(r*255), Math.floor(g*255), Math.floor(b*255)];
-	    return result;
-	  }
-
-	  function HSVtoHSL (hsv) {
-	    var h = hsv[0],
-	      s = hsv[1]/100,
-	      v = hsv[2]/100,
-	      k = (2-s)*v;
-
-	    return [
-	      h,
-	      Math.round(s*v / (k<1 ? k : 2-k) * 10000) / 100,
-	      k/2 * 100
-	    ];
-	  }
-
-	  function stringToInteger (string) {
-	    var total = 0
-	    for (var i = 0; i !== string.length; i++) {
-	      if (total >= Number.MAX_SAFE_INTEGER) break;
-	      total += string.charCodeAt(i)
-	    }
-	    return total
-	  }
-
-	  return randomColor;
-	}));
-
-
-/***/ },
 /* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -40219,7 +40258,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _d = __webpack_require__(247);
+	var _d = __webpack_require__(248);
 
 	var _d2 = _interopRequireDefault(_d);
 
@@ -40292,7 +40331,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _d = __webpack_require__(247);
+	var _d = __webpack_require__(248);
 
 	var _d2 = _interopRequireDefault(_d);
 
@@ -40373,7 +40412,7 @@
 	                return '\n                ' + prev + '\n                <div class=\'tool-tip-info\'>\n                    <p class=\'tool-tip-color\' style=\'background-color: ' + cur.color + '\'></p>\n                    <p class=\'tool-tip-symbol\'>' + cur.dataset_code + '</p>\n                    <p class=\'tool-tip-value\'>' + cur.value.toFixed(2) + '</p>\n                </div>\n            ';
 	            }, '');
 
-	            tooltip.html(tooltipHtml).style('top', _d2.default.event.pageY + 'px').style('left', _d2.default.event.pageX + 20 + 'px');
+	            tooltip.html(tooltipHtml).style('top', _d2.default.event.pageY + 5 + 'px').style('left', _d2.default.event.pageX + 20 + 'px');
 	        }
 	    }, {
 	        key: 'renderAxis',
@@ -40386,8 +40425,15 @@
 
 	            rect.append('rect').attr('width', this.props.w).attr('height', this.props.h).style('fill', 'none').style('pointer-events', 'all').on('mousemove', function () {
 	                _this2.mousemove(node, verticalLine, tooltip);
+	            }).on('mouseout', function () {
+	                tooltip.style('display', 'none');
+	                verticalLine.style('stroke', 'none');
+	            }).on('mouseover', function () {
+	                tooltip.style('display', 'block');
 	            });
-	            var verticalLine = rect.append('line').attr('x1', 100).attr('y1', 0).attr('x2', 100).attr('y2', this.props.h).style('fill', 'none').style('display', 'none').style('stroke', '#000');
+	            var verticalLine = rect.append('line').attr('x1', 100).attr('y1', 0).attr('x2', 100).attr('y2', this.props.h).style('fill', 'none').style('display', 'none').style('stroke', '#EBEBEB').on('mouseover', function () {
+	                tooltip.style('display', 'block');
+	            });
 	        }
 	    }, {
 	        key: 'render',
@@ -40417,8 +40463,8 @@
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./index.scss", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./index.scss");
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./reset.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./reset.scss");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -40436,7 +40482,7 @@
 
 
 	// module
-	exports.push([module.id, "body {\n  font-family: 'Roboto', sans-serif; }\n\nheader {\n  height: 150px;\n  background-color: #424242;\n  margin-bottom: 50px;\n  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.25); }\n\nh1 {\n  font-size: 5em;\n  text-align: center;\n  color: #EBEBEB;\n  padding-top: 50px;\n  letter-spacing: 4px; }\n\n.app-container {\n  margin-right: auto;\n  margin-left: auto; }\n\n.chart-container {\n  width: 950px;\n  margin-right: auto;\n  margin-left: auto; }\n\n.line {\n  fill: none;\n  stroke-width: 2px; }\n\n#line-chart {\n  background: #fff;\n  padding: 10px 20px;\n  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.15);\n  margin-bottom: 75px; }\n\n.axis {\n  fill: #000;\n  opacity: 1; }\n\n.axis path,\n.axis line {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #000;\n  shape-rendering: crispEdges; }\n\n.axis text {\n  font-size: 14px; }\n\n.y-grid .tick {\n  stroke: #4b5f87;\n  opacity: 1; }\n\n.tooltip-container {\n  position: relative; }\n\n.tool-tip {\n  position: absolute;\n  background-color: #000;\n  color: #FFF;\n  padding: 3px 5px;\n  border-radius: 2px;\n  box-shadow: 3px 5px 7px rgba(0, 0, 0, 0.15); }\n  .tool-tip p {\n    display: inline-block; }\n  .tool-tip .tool-tip-info {\n    padding: 2px 10px;\n    font-size: 0.8em; }\n    .tool-tip .tool-tip-info .tool-tip-color {\n      height: 8px;\n      width: 8px;\n      border: 1px solid #FFF;\n      margin-right: 9px; }\n    .tool-tip .tool-tip-info .tool-tip-symbol {\n      padding: 0;\n      width: 57px; }\n    .tool-tip .tool-tip-info .tool-tip-value {\n      background-color: #000;\n      padding: 4px;\n      border-radius: 4px;\n      text-align: right;\n      width: 52px; }\n\n.stocklist-container {\n  width: 800px;\n  margin-right: auto;\n  margin-left: auto;\n  margin-top: 50px;\n  margin-bottom: 100px; }\n  .stocklist-container ul {\n    width: 750px;\n    margin-right: auto;\n    margin-left: auto; }\n    .stocklist-container ul .stock {\n      position: relative;\n      display: inline-block;\n      width: 175px;\n      text-align: center;\n      height: 75px;\n      box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);\n      margin: 5px; }\n      .stocklist-container ul .stock .stock-symbol {\n        display: inline-block;\n        position: relative;\n        top: 50%;\n        transform: translateY(-50%); }\n      .stocklist-container ul .stock .stock-remove {\n        position: absolute;\n        cursor: pointer;\n        top: 3px;\n        right: 3px;\n        padding: 2px; }\n        .stocklist-container ul .stock .stock-remove:hover {\n          color: #FFF;\n          background-color: #f92f2f;\n          border-radius: 2px; }\n", ""]);
+	exports.push([module.id, "/* http://meyerweb.com/eric/tools/css/reset/ \n   v2.0 | 20110126\n   License: none (public domain)\n*/\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n  margin: 0;\n  padding: 0;\n  border: 0;\n  font-size: 100%;\n  font: inherit;\n  vertical-align: baseline; }\n\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n  display: block; }\n\nbody {\n  line-height: 1; }\n\nol, ul {\n  list-style: none; }\n\nblockquote, q {\n  quotes: none; }\n\nblockquote:before, blockquote:after,\nq:before, q:after {\n  content: '';\n  content: none; }\n\ntable {\n  border-collapse: collapse;\n  border-spacing: 0; }\n", ""]);
 
 	// exports
 
@@ -40751,6 +40797,46 @@
 
 /***/ },
 /* 256 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(257);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(255)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./index.scss", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./index.scss");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 257 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(254)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "body {\n  font-family: 'Roboto', sans-serif; }\n\nheader {\n  height: 150px;\n  background-color: #a71818;\n  margin-bottom: 50px;\n  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.25); }\n\nh1 {\n  font-size: 5em;\n  text-align: center;\n  color: #EBEBEB;\n  padding-top: 50px;\n  letter-spacing: 4px; }\n\n.app-container {\n  margin-right: auto;\n  margin-left: auto; }\n\n.chart-container {\n  width: 950px;\n  margin-right: auto;\n  margin-left: auto; }\n\n.line {\n  fill: none;\n  stroke-width: 2px; }\n\n#line-chart {\n  background: #fff;\n  padding: 10px 20px;\n  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.15);\n  margin-bottom: 75px; }\n\n.axis {\n  fill: #000;\n  opacity: 1; }\n\n.axis path,\n.axis line {\n  fill: none;\n  stroke-width: 1px;\n  stroke: #000;\n  shape-rendering: crispEdges; }\n\n.axis text {\n  font-size: 14px; }\n\n.y-grid .tick {\n  stroke: #4b5f87;\n  opacity: 1; }\n\n.tooltip-container {\n  position: relative; }\n\n.tool-tip {\n  position: absolute;\n  display: none;\n  background-color: #000;\n  color: #FFF;\n  padding: 3px 5px;\n  border-radius: 2px;\n  box-shadow: 3px 5px 7px rgba(0, 0, 0, 0.15); }\n  .tool-tip p {\n    display: inline-block; }\n  .tool-tip .tool-tip-info {\n    padding: 2px 10px;\n    font-size: 0.8em; }\n    .tool-tip .tool-tip-info .tool-tip-color {\n      height: 8px;\n      width: 8px;\n      border: 1px solid #FFF;\n      margin-right: 9px; }\n    .tool-tip .tool-tip-info .tool-tip-symbol {\n      padding: 0;\n      width: 57px; }\n    .tool-tip .tool-tip-info .tool-tip-value {\n      background-color: #000;\n      padding: 4px;\n      border-radius: 4px;\n      text-align: right;\n      width: 52px; }\n\n.stocklist-container {\n  width: 800px;\n  margin-right: auto;\n  margin-left: auto;\n  margin-top: 50px;\n  margin-bottom: 100px; }\n  .stocklist-container ul {\n    width: 750px;\n    margin-right: auto;\n    margin-left: auto; }\n    .stocklist-container ul .stock {\n      position: relative;\n      display: inline-block;\n      width: 175px;\n      text-align: center;\n      height: 75px;\n      box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);\n      margin: 5px; }\n      .stocklist-container ul .stock .stock-symbol {\n        display: inline-block;\n        position: relative;\n        top: 50%;\n        transform: translateY(-50%); }\n      .stocklist-container ul .stock .stock-remove {\n        position: absolute;\n        cursor: pointer;\n        top: 3px;\n        right: 3px;\n        padding: 2px; }\n        .stocklist-container ul .stock .stock-remove:hover {\n          color: #FFF;\n          background-color: #f92f2f;\n          border-radius: 2px; }\n\n.search-container {\n  width: 200px;\n  margin-right: auto;\n  margin-left: auto; }\n  .search-container .search-form .search-input {\n    box-sizing: border-box;\n    height: 36px;\n    padding: 10px 15px;\n    border: 0;\n    font-size: 1.2em;\n    border-bottom: 2px solid #EBEBEB;\n    width: 100px;\n    transition: all 0.1s; }\n    .search-container .search-form .search-input:focus {\n      border: 0;\n      border-bottom: 2px solid #EBEBEB;\n      outline: none; }\n    .search-container .search-form .search-input:hover {\n      border-bottom: 2px solid #90CCFF; }\n  .search-container .search-form .search-submit {\n    box-sizing: border-box;\n    height: 36px;\n    width: 66px;\n    padding: 10px 15px;\n    border: 0;\n    outline: none;\n    color: #FFF;\n    background-color: #2E89C5;\n    transition: all 0.1s;\n    border-radius: 3px 3px 3px 0;\n    margin-left: 4px; }\n    .search-container .search-form .search-submit:active {\n      -moz-box-box-shadow: inset 0 0 25px #5557b1;\n      -webkit-box-box-shadow: inset 0 0 25px #5557b1;\n      box-shadow: inset 0 0 25px #5557b1; }\n    .search-container .search-form .search-submit:hover {\n      cursor: pointer; }\n\n.error {\n  padding: 10px 20px 10px 0;\n  color: red;\n  text-align: left; }\n\nfooter {\n  background-color: #f7cece;\n  text-align: center;\n  padding: 3px 0; }\n  footer a {\n    color: #000;\n    text-decoration: none; }\n", ""]);
+
+	// exports
+
+
+/***/ },
+/* 258 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -40981,46 +41067,6 @@
 	}
 
 	module.exports = createLogger;
-
-/***/ },
-/* 257 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(258);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(255)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./reset.scss", function() {
-				var newContent = require("!!./../../node_modules/css-loader/index.js!./../../node_modules/sass-loader/index.js!./reset.scss");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 258 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(254)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "/* http://meyerweb.com/eric/tools/css/reset/ \n   v2.0 | 20110126\n   License: none (public domain)\n*/\nhtml, body, div, span, applet, object, iframe,\nh1, h2, h3, h4, h5, h6, p, blockquote, pre,\na, abbr, acronym, address, big, cite, code,\ndel, dfn, em, img, ins, kbd, q, s, samp,\nsmall, strike, strong, sub, sup, tt, var,\nb, u, i, center,\ndl, dt, dd, ol, ul, li,\nfieldset, form, label, legend,\ntable, caption, tbody, tfoot, thead, tr, th, td,\narticle, aside, canvas, details, embed,\nfigure, figcaption, footer, header, hgroup,\nmenu, nav, output, ruby, section, summary,\ntime, mark, audio, video {\n  margin: 0;\n  padding: 0;\n  border: 0;\n  font-size: 100%;\n  font: inherit;\n  vertical-align: baseline; }\n\n/* HTML5 display-role reset for older browsers */\narticle, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {\n  display: block; }\n\nbody {\n  line-height: 1; }\n\nol, ul {\n  list-style: none; }\n\nblockquote, q {\n  quotes: none; }\n\nblockquote:before, blockquote:after,\nq:before, q:after {\n  content: '';\n  content: none; }\n\ntable {\n  border-collapse: collapse;\n  border-spacing: 0; }\n", ""]);
-
-	// exports
-
 
 /***/ }
 /******/ ]);

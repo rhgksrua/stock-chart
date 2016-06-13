@@ -4,6 +4,7 @@ import randomcolor from 'randomcolor';
 export const ADD_STOCK = 'ADD_STOCK';
 export const REMOVE_STOCK = 'REMOVE_STOCK';
 export const INITIALIZE = 'INITIALIZE';
+export const ERROR = 'ERROR';
 
 const HOST = `${window.location.protocol}//${window.location.host}`;
 
@@ -36,6 +37,7 @@ export const addStockAJAX = stockSymbol => {
                 return data;
             })
             .catch(err => {
+                dispatch(addError('Add Stock Error'));
                 console.warn(err);
             });
     };
@@ -75,10 +77,18 @@ export const removeStockAJAX = stockSymbol => {
                 return data;
             })
             .catch(err => {
+                dispatch(addError('Server Error'))
                 console.warn(err);
             });
     };
 };
+
+export const addError = error => {
+    return {
+        type: ERROR,
+        error
+    }
+}
 
 export const removeStockSocket = stockSymbol => {
     // do socket io sutff here

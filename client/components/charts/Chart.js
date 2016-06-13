@@ -139,7 +139,7 @@ Chart.defaultProps = {
 };
 
 function mapStateToProps(state, ownProps) {
-    const stocks = state;
+    const stocks = state.stocks;
     return {
         stocks
     };

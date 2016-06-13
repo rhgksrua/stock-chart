@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { addStockAJAX } from '../actions/actions';
+import { addStockAJAX, addError } from '../actions/actions';
 
 class Search extends React.Component {
     constructor(props) {
@@ -20,11 +20,12 @@ class Search extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
         let userInput = this.state.userInput;
-        const re = /[a-zA-Z]+/;
+        const re = /^[a-zA-Z]{2,6}$/;
         if (!re.test(userInput)) {
             this.setState({
-                error: `Invalid`
+                error: `Invalid Input`
             });
+            this.props.updateError('');
             return;
         }
         
@@ -47,28 +48,37 @@ class Search extends React.Component {
     }
     render() {
         return (
-            <div>
-                <form onSubmit={this.handleSubmit}>
-                    <input 
+            <div className='search-container'>
+                <form className='search-form' onSubmit={this.handleSubmit}>
+                    <input
+                        className='search-input'
                         type='text' 
                         onChange={this.handleChange} 
                     />
-                    <input type='submit' value='Add' />
+                    <input className='search-submit' type='submit' value='Add' />
                 </form>
-                <div className='error'>{this.state.error}</div>
+                {this.state.error &&
+                    <div className='error'>{this.state.error}</div>
+                }
+                {this.props.error &&
+                    <div className='error'>{this.props.error}</div>
+                }
             </div>
         );
     }
 }
 
 function mapStateToProps(state, ownProps) {
-    return Object.assign({}, ownProps, {stocks: state});
+    return Object.assign({}, ownProps, {stocks: state.stocks, error: state.error});
 }
 
 function mapDispatchToProps(dispatch) {
     return {
         addStock: stockSymbol => {
             dispatch(addStockAJAX(stockSymbol));
+        },
+        updateError: error => {
+            dispatch(addError(''));
         }
     }
 }

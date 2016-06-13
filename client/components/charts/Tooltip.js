@@ -67,7 +67,7 @@ class Tooltip extends React.Component {
         }, '');
         
         tooltip.html(tooltipHtml)
-               .style('top', `${d3.event.pageY}px`)
+               .style('top', `${d3.event.pageY + 5}px`)
                .style('left', `${d3.event.pageX + 20}px`);
     }
     
@@ -84,7 +84,14 @@ class Tooltip extends React.Component {
             .style('pointer-events', 'all')
             .on('mousemove', () => {
                 this.mousemove(node, verticalLine, tooltip);
-            });
+            })
+            .on('mouseout', () => {
+                tooltip.style('display', 'none');
+                verticalLine.style('stroke', 'none');
+            })
+            .on('mouseover', () => {
+                tooltip.style('display', 'block');
+            })
         const verticalLine = rect.append('line')
             .attr('x1', 100)
             .attr('y1', 0)
@@ -92,7 +99,10 @@ class Tooltip extends React.Component {
             .attr('y2', this.props.h)
             .style('fill', 'none')
             .style('display', 'none')
-            .style('stroke', '#000');
+            .style('stroke', '#EBEBEB')
+            .on('mouseover', () => {
+                tooltip.style('display', 'block');
+            })
             
     }
     

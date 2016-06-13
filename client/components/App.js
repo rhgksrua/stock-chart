@@ -36,7 +36,7 @@ class App extends React.Component {
                 <Search />
                 <StockListContainer />
                 <footer>
-                    <p>rhgksrua</p>
+                    <a href='https://github.com/rhgksrua/stock-chart'>rhgksrua</a>
                 </footer>
             </div>
         );
